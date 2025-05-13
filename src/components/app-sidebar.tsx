@@ -17,7 +17,6 @@ import {
   IconSearch,
   IconSettings,
   IconUsers,
-  IconMedicalCross
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -41,30 +40,32 @@ const data = {
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
+    
+  ],
+  navClouds: [
+    
+   
+        
+  ],
+  navSecondary: [
+    
+  ],
+  documents: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
+      name: "Pacientes",
+      url: "/dashboard/pacientes",
+      icon: IconUsers,
     },
     {
-      title: "Examenes Medicos",
+      name: "Examenes Medicos",
       url: "/dashboard/examenes",
       icon: IconFolder,
     },
     {
-      title: "Medicos",
+      name: "Medicos",
       url: "/dashboard/medicos",
       icon: IconUsers,
     },
-  ],
-  navClouds: [
-    
-    
-  ],
-  navSecondary: [
-   
-  ],
-  documents: [
     
   ],
 }
@@ -90,9 +91,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMain} />
         <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
-      
+      <SidebarFooter>
+        <NavUser user={data.user} />
+      </SidebarFooter>
     </Sidebar>
   )
 }
