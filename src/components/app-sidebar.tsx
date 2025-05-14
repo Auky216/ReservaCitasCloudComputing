@@ -99,7 +99,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="/">
                 <IconInnerShadowTop className="!size-5 text-primary" />
-                <span className="text-base font-semibold text-primary">Blueshift Medical Health</span>
+                <span className="text-base font-semibold text-primary">Salud Care</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>

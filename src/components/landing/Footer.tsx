@@ -65,7 +65,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-blue-400 pt-8 text-center text-blue-100">
-          <p>Copyright © 2023 • Blueshift Medical Health • Todos los derechos reservados</p>
+          <p>Copyright © 2023 • Salud Care • Todos los derechos reservados</p>
         </div>
       </div>
     </footer>
