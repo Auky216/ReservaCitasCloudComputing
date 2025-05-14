@@ -1,7 +1,6 @@
-// components/medicos/add-medico-dialog.tsx
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,32 +10,33 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MedicoForm } from "./medico-form";
-import { createMedico } from "@/lib/api/medicos";
+import { PacienteForm } from "./paciente-form";
+import { createPaciente } from "@/lib/api/pacientes";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
-interface AddMedicoDialogProps {
+interface AddPacienteDialogProps {
   children: React.ReactNode;
   onUpdate: () => Promise<void>;
 }
 
-export function AddMedicoDialog({ children, onUpdate }: AddMedicoDialogProps) {
-  const [open, setOpen] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
+export function AddPacienteDialog({ children, onUpdate }: AddPacienteDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      await createMedico(data);
-      toast.success("Médico agregado", {
-        description: `${data.nombre} ${data.apellido} ha sido agregado correctamente.`
+      await createPaciente(data);
+      toast.success("Paciente agregado", {
+        description: `${data.nombre} ha sido agregado correctamente.`
       });
       await onUpdate();
       setOpen(false);
     } catch (error) {
+      console.error("Error al agregar paciente:", error);
       toast.error("Error", {
-        description: "Ocurrió un error al agregar el médico."
+        description: "Ocurrió un error al agregar el paciente."
       });
     } finally {
       setIsSubmitting(false);
@@ -53,14 +53,14 @@ export function AddMedicoDialog({ children, onUpdate }: AddMedicoDialogProps) {
               <UserPlus className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <DialogTitle>Agregar nuevo médico</DialogTitle>
+              <DialogTitle>Agregar nuevo paciente</DialogTitle>
               <DialogDescription>
-                Complete el formulario para agregar un nuevo médico al sistema.
+                Complete el formulario para agregar un nuevo paciente al sistema.
               </DialogDescription>
             </div>
           </div>
         </DialogHeader>
-        <MedicoForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+        <PacienteForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
       </DialogContent>
     </Dialog>
   );

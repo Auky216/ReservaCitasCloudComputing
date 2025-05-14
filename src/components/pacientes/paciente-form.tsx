@@ -1,4 +1,4 @@
-// components/medicos/medico-form.tsx
+// components/pacientes/paciente-form.tsx
 "use client";
 
 import React from "react";
@@ -23,47 +23,30 @@ import { DialogFooter } from "@/components/ui/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Medico } from "@/lib/api/medicos";
-import { 
-  HeartPulse, 
-  Brain, 
-  Baby, 
-  Stethoscope, 
-  Bone, 
-  Eye, 
-  User2
-} from "lucide-react";
+import { Paciente } from "@/lib/api/pacientes";
+import { Mars, Venus } from "lucide-react";
 
 // Definir esquema de validación
 const formSchema = z.object({
   nombre: z.string().min(2, { message: "El nombre debe tener al menos 2 caracteres" }),
-  apellido: z.string().min(2, { message: "El apellido debe tener al menos 2 caracteres" }),
-  especialidad: z.string().min(2, { message: "Debe seleccionar una especialidad" }),
+  dni: z.string().min(8, { message: "El DNI debe tener al menos 8 caracteres" }),
+  fecha_nac: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Formato de fecha inválido (YYYY-MM-DD)" }),
+  sexo: z.string().min(1, { message: "Debe seleccionar un sexo" }),
 });
 
-// Especialidades médicas con sus iconos
-const especialidades = [
-  { value: "Cardiología", label: "Cardiología", icon: <HeartPulse className="h-4 w-4 text-red-500" /> },
-  { value: "Neurología", label: "Neurología", icon: <Brain className="h-4 w-4 text-blue-500" /> },
-  { value: "Pediatría", label: "Pediatría", icon: <Baby className="h-4 w-4 text-green-500" /> },
-  { value: "Traumatología", label: "Traumatología", icon: <Bone className="h-4 w-4 text-amber-500" /> },
-  { value: "Oftalmología", label: "Oftalmología", icon: <Eye className="h-4 w-4 text-purple-500" /> },
-  { value: "Dermatología", label: "Dermatología", icon: <User2 className="h-4 w-4 text-pink-500" /> },
-  { value: "Medicina General", label: "Medicina General", icon: <Stethoscope className="h-4 w-4 text-gray-500" /> },
-];
-
-interface MedicoFormProps {
+interface PacienteFormProps {
   onSubmit: (data: z.infer<typeof formSchema>) => void;
   isSubmitting?: boolean;
 }
 
-export function MedicoForm({ onSubmit, isSubmitting = false }: MedicoFormProps) {
+export function PacienteForm({ onSubmit, isSubmitting = false }: PacienteFormProps) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       nombre: "",
-      apellido: "",
-      especialidad: "",
+      dni: "",
+      fecha_nac: "",
+      sexo: "",
     },
   });
 
@@ -76,9 +59,9 @@ export function MedicoForm({ onSubmit, isSubmitting = false }: MedicoFormProps) 
             name="nombre"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nombre</FormLabel>
+                <FormLabel>Nombre completo</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ana" {...field} />
+                  <Input placeholder="María" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -87,12 +70,12 @@ export function MedicoForm({ onSubmit, isSubmitting = false }: MedicoFormProps) 
 
           <FormField
             control={form.control}
-            name="apellido"
+            name="dni"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Apellido</FormLabel>
+                <FormLabel>DNI</FormLabel>
                 <FormControl>
-                  <Input placeholder="García" {...field} />
+                  <Input placeholder="12345678" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -101,25 +84,46 @@ export function MedicoForm({ onSubmit, isSubmitting = false }: MedicoFormProps) 
 
           <FormField
             control={form.control}
-            name="especialidad"
+            name="fecha_nac"
             render={({ field }) => (
-              <FormItem className="col-span-full">
-                <FormLabel>Especialidad</FormLabel>
+              <FormItem>
+                <FormLabel>Fecha de nacimiento</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} onChange={(e) => {
+                    // Formatea la fecha al formato YYYY-MM-DD que espera la API
+                    field.onChange(e.target.value);
+                  }} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="sexo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Sexo</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Seleccione la especialidad" />
+                      <SelectValue placeholder="Seleccione el sexo" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {especialidades.map((esp) => (
-                      <SelectItem key={esp.value} value={esp.value} className="flex items-center gap-2">
-                        <div className="flex items-center gap-2">
-                          {esp.icon}
-                          <span>{esp.label}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="F" className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        <Venus className="h-4 w-4 text-pink-500" />
+                        <span>Femenino</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="M" className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
+                        <Mars className="h-4 w-4 text-blue-500" />
+                        <span>Masculino</span>
+                      </div>
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -130,7 +134,7 @@ export function MedicoForm({ onSubmit, isSubmitting = false }: MedicoFormProps) 
 
         <DialogFooter>
           <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto">
-            {isSubmitting ? "Guardando..." : "Guardar médico"}
+            {isSubmitting ? "Guardando..." : "Guardar paciente"}
           </Button>
         </DialogFooter>
       </form>
