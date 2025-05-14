@@ -1,13 +1,16 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
-import { SparklesText } from '@/components/magicui/sparkles-text';
-import { NumberTicker } from '@/components/magicui/number-ticker';
+import React from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { SparklesText } from "@/components/magicui/sparkles-text";
+import { NumberTicker } from "@/components/magicui/number-ticker";
 
 const Hero = () => {
+  const router = useRouter();
+
   return (
     <section className="pt-32 pb-16 bg-gradient-to-b from-blue-50 to-white">
       <div className="container mx-auto px-4">
@@ -18,11 +21,15 @@ const Hero = () => {
             </SparklesText>
             <p className="text-lg text-gray-600">
               Comprometidos con tu salud y bienestar. Ofrecemos atención médica
-              integral con los mejores especialistas y tecnología de vanguardia para
-              cuidar de ti y tu familia.
+              integral con los mejores especialistas y tecnología de vanguardia
+              para cuidar de ti y tu familia.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="flex items-center gap-2">
+              <Button
+                size="lg"
+                className="flex items-center gap-2"
+                onClick={() => router.push("/dashboard")}
+              >
                 Saber Más
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -31,7 +38,7 @@ const Hero = () => {
               </Button>
             </div>
           </div>
-          
+
           <div className="relative">
             <div className="bg-blue-100 rounded-full w-[400px] h-[400px] mx-auto relative">
               <img
