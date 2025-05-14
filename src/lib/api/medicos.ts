@@ -7,7 +7,7 @@ export interface Medico {
 }
 
 // URL base de la API desde las variables de entorno
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_URL = "http://p1-77815598.us-east-1.elb.amazonaws.com:3000";
 
 // Obtener todos los médicos
 export async function getMedicos(): Promise<Medico[]> {
