@@ -32,6 +32,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { Book } from "lucide-react"
 
 const data = {
   user: {
@@ -66,6 +67,11 @@ const data = {
       url: "/dashboard/medicos",
       icon: IconUsers,
     },
+    {
+      name: "Historial Medico",
+      url: "/dashboard/historial",
+      icon: Book,
+    },
     
   ],
 }
@@ -81,8 +87,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <IconInnerShadowTop className="!size-5 text-primary" />
+                <span className="text-base font-semibold text-primary">Blueshift Medical Health</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
