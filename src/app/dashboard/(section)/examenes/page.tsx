@@ -2,88 +2,31 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, Users, User, FileText } from "lucide-react";
+import { 
+  Alert,
+  AlertDescription 
+} from "@/components/ui/alert";
+import { 
+  Search, 
+  Users, 
+  User, 
+  FileText, 
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight 
+} from "lucide-react";
 
-// Interfaz para consulta de médico
-interface ConsultaMedico {
-  descripcion: string;
-  fecha: string;
-  paciente_id: number;
-  paciente_nombre?: string;
-  nombre_medico?: string;
-}
-
-// Interfaz para consulta de paciente
-interface ConsultaPaciente {
-  descripcion: string;
-  fecha: string;
-  nombre_medico: string;
-  paciente_id: number;
-}
-
-// Interfaz para el resumen de médico
-interface ResumenMedico {
-  medico?: {
-    id: number;
-    nombre: string;
-    apellido?: string;
-    especialidad: string;
-  };
-  consultas: ConsultaMedico[];
-}
-
-// Interfaz para el resumen de paciente
-interface ResumenPaciente {
-  paciente?: {
-    id: number;
-    nombre: string;
-    dni: string;
-    fecha_nac: string;
-    sexo: string;
-  };
-  consultas: ConsultaPaciente[];
-  contactos?: any[];
-}
-
-// Tipo de búsqueda
-type TipoBusqueda = 'medico' | 'paciente';
-
-// Tipo union para resumen
-type Resumen = ResumenMedico | ResumenPaciente;
-
-// Tipo union para consultas
-type Consulta = ConsultaMedico | ConsultaPaciente;
-
-// URL base de la API
-const API_URL = "http://p1-77815598.us-east-1.elb.amazonaws.com:5002";
-
-// Función para formatear fecha
-const formatearFecha = (fechaISO: string): string => {
-  return new Date(fechaISO).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
-};
-
-// Función para obtener resumen
-async function obtenerResumen(
-  tipo: TipoBusqueda, 
-  id: number
-): Promise<Resumen | null> {
-  try {
-    const response = await fetch(`${API_URL}/resumen/${tipo}/${id}`);
-    
-    if (!response.ok) {
-      throw new Error(`Error al obtener resumen de ${tipo} (${response.status})`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error(`Error en obtenerResumen de ${tipo}:`, error);
-    return null;
-  }
-}
+import { 
+  ConsultaMedico,
+  ConsultaPaciente,
+  ResumenMedico,
+  ResumenPaciente,
+  TipoBusqueda,
+  Resumen,
+  Consulta,
+  formatearFecha,
+  obtenerResumen
+} from "@/lib/api/examenes";
 
 export default function ResumenPage() {
   const [resumen, setResumen] = useState<Resumen | null>(null);
@@ -91,6 +34,13 @@ export default function ResumenPage() {
   const [searchId, setSearchId] = useState("");
   const [tipoBusqueda, setTipoBusqueda] = useState<TipoBusqueda>('medico');
   const [error, setError] = useState<string | null>(null);
+
+  // Manejar tecla Enter en el campo de búsqueda
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
   const handleSearch = async () => {
     if (!searchId.trim()) return;
@@ -142,49 +92,79 @@ export default function ResumenPage() {
   };
 
   return (
-    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 p-4">
-      <div className="flex items-center gap-2">
-        {tipoBusqueda === 'medico' ? <Users className="w-6 h-6 text-primary" /> : <FileText className="w-6 h-6 text-primary" />}
-        <h1 className="text-2xl font-bold">
-          Resumen de {tipoBusqueda === 'medico' ? 'Médico' : 'Paciente'}
-        </h1>
+    <div className="flex flex-col gap-4 p-4">
+      {/* Encabezado */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          {tipoBusqueda === 'medico' ? 
+            <Users className="w-6 h-6 text-primary" /> : 
+            <FileText className="w-6 h-6 text-primary" />
+          }
+          <h1 className="text-2xl font-bold">
+            Resumen de {tipoBusqueda === 'medico' ? 'Médico' : 'Paciente'}
+          </h1>
+        </div>
       </div>
-      <p className="text-sm text-muted-foreground">
+
+      <p className="text-sm text-muted-foreground mb-2">
         Busca el resumen de un {tipoBusqueda === 'medico' ? 'médico' : 'paciente'} por su ID.
       </p>
 
-      <div className="flex gap-2 items-center">
+      {/* Selector de tipo y búsqueda */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         {/* Selector de tipo de búsqueda */}
-        <div className="flex gap-2 mr-4">
+        <div className="flex gap-2">
           <Button 
             variant={tipoBusqueda === 'medico' ? 'default' : 'outline'}
-            onClick={() => setTipoBusqueda('medico')}
+            onClick={() => {
+              setTipoBusqueda('medico');
+              setResumen(null);
+              setError(null);
+            }}
+            className="flex gap-2 items-center"
           >
+            <Users className="w-4 h-4" />
             Médico
           </Button>
           <Button 
             variant={tipoBusqueda === 'paciente' ? 'default' : 'outline'}
-            onClick={() => setTipoBusqueda('paciente')}
+            onClick={() => {
+              setTipoBusqueda('paciente');
+              setResumen(null);
+              setError(null);
+            }}
+            className="flex gap-2 items-center"
           >
+            <User className="w-4 h-4" />
             Paciente
           </Button>
         </div>
 
-        <Input
-          placeholder={`Buscar ${tipoBusqueda === 'medico' ? 'médico' : 'paciente'} por ID`}
-          value={searchId}
-          onChange={(e) => setSearchId(e.target.value)}
-          className="w-64"
-        />
-        <Button onClick={handleSearch} variant="secondary">
-          <Search className="w-4 h-4 mr-2" /> Buscar
-        </Button>
+        {/* Búsqueda */}
+        <div className="flex gap-2 items-center w-full sm:w-auto">
+          <div className="relative flex flex-1 sm:flex-initial items-center">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder={`Buscar ${tipoBusqueda === 'medico' ? 'médico' : 'paciente'} por ID`}
+              value={searchId}
+              onChange={(e) => setSearchId(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="pl-10 w-full sm:w-64"
+              type="number"
+              min="1"
+            />
+          </div>
+          <Button onClick={handleSearch} variant="default">
+            Buscar
+          </Button>
+        </div>
       </div>
 
       {/* Manejo de errores */}
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-          {error}
+        <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative mt-4" role="alert">
+          <AlertTriangle className="h-5 w-5 text-red-500" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -197,10 +177,10 @@ export default function ResumenPage() {
       ) : resumen && (
         <div className="mt-6 space-y-6">
           {/* Tarjeta de Información */}
-          <div className="bg-background border rounded-lg p-6 flex items-center gap-6">
+          <div className="bg-background border rounded-lg p-6 flex flex-col sm:flex-row items-center gap-6">
             {/* Imagen de usuario por defecto */}
-            <div className="bg-gray-200 rounded-full p-4">
-              <User className="w-24 h-24 text-gray-500" />
+            <div className="bg-gray-100 rounded-full p-4 mb-4 sm:mb-0">
+              <User className="w-20 h-20 text-gray-500" />
             </div>
             
             {/* Detalles */}
@@ -222,55 +202,68 @@ export default function ResumenPage() {
           {/* Tabla de Consultas */}
           <div>
             <h3 className="text-xl font-semibold mb-4">Historial de Consultas</h3>
-            <div className="border rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="p-3 text-left">Fecha</th>
-                    {tipoBusqueda === 'medico' ? (
-                      <th className="p-3 text-left">Paciente</th>
-                    ) : (
-                      <th className="p-3 text-left">Médico</th>
-                    )}
-                    <th className="p-3 text-left">Descripción</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {consultasPaginadas.map((consulta, index) => (
-                    <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50">
-                      <td className="p-3">{formatearFecha(consulta.fecha)}</td>
-                      <td className="p-3">
-                        {obtenerEtiquetaPersona(consulta, tipoBusqueda)}
-                      </td>
-                      <td className="p-3">{consulta.descripcion}</td>
+            
+            {consultas.length > 0 ? (
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="p-3 text-left">Fecha</th>
+                      {tipoBusqueda === 'medico' ? (
+                        <th className="p-3 text-left">Paciente</th>
+                      ) : (
+                        <th className="p-3 text-left">Médico</th>
+                      )}
+                      <th className="p-3 text-left">Descripción</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {consultasPaginadas.map((consulta, index) => (
+                      <tr key={index} className="border-b last:border-b-0 hover:bg-gray-50">
+                        <td className="p-3">{formatearFecha(consulta.fecha)}</td>
+                        <td className="p-3">
+                          {obtenerEtiquetaPersona(consulta, tipoBusqueda)}
+                        </td>
+                        <td className="p-3">{consulta.descripcion}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="text-center py-8 border rounded-lg bg-gray-50">
+                <p className="text-muted-foreground">No hay consultas registradas.</p>
+              </div>
+            )}
 
             {/* Controles de Paginación */}
-            <div className="flex justify-between mt-4">
-              <Button 
-                onClick={() => setPaginaActual(p => Math.max(0, p - 1))}
-                disabled={paginaActual === 0}
-                variant="outline"
-              >
-                Anterior
-              </Button>
-              <span className="self-center">
-                Página {paginaActual + 1} de {totalPaginas}
-              </span>
-              <Button 
-                onClick={() => setPaginaActual(p => 
-                  p + 1 < totalPaginas ? p + 1 : p
-                )}
-                disabled={paginaActual >= totalPaginas - 1}
-                variant="outline"
-              >
-                Siguiente
-              </Button>
-            </div>
+            {consultas.length > 0 && totalPaginas > 1 && (
+              <div className="flex justify-between items-center mt-4">
+                <Button 
+                  onClick={() => setPaginaActual(p => Math.max(0, p - 1))}
+                  disabled={paginaActual === 0}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                >
+                  <ChevronLeft className="h-4 w-4" /> Anterior
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Página {paginaActual + 1} de {totalPaginas}
+                </span>
+                <Button 
+                  onClick={() => setPaginaActual(p => 
+                    p + 1 < totalPaginas ? p + 1 : p
+                  )}
+                  disabled={paginaActual >= totalPaginas - 1}
+                  variant="outline"
+                  size="sm"
+                  className="gap-1"
+                >
+                  Siguiente <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -284,7 +277,7 @@ function MedicoInfo({ medico }: { medico?: ResumenMedico['medico'] }) {
 
   return (
     <>
-      <h2 className="text-3xl font-bold mb-2">
+      <h2 className="text-3xl font-bold mb-2 text-center sm:text-left">
         {medico.nombre} {medico.apellido || ''}
       </h2>
       <div className="space-y-2">
@@ -305,7 +298,7 @@ function PacienteInfo({ paciente }: { paciente?: ResumenPaciente['paciente'] }) 
 
   return (
     <>
-      <h2 className="text-3xl font-bold mb-2">
+      <h2 className="text-3xl font-bold mb-2 text-center sm:text-left">
         {paciente.nombre}
       </h2>
       <div className="space-y-2">
