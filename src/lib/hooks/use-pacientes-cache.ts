@@ -1,111 +1,85 @@
-import { useState, useEffect } from 'react';
-import { Paciente, PaginatedResponse, PaginationParams, getPacientes } from '@/lib/api/pacientes';
-
-// Tipo para el objeto de caché
-interface PacientesCache {
-  [key: string]: {
-    data: Paciente[];
-    timestamp: number;
-    meta: {
-      total: number;
-      totalPages: number;
-    };
-  };
+// src/lib/api/medicos.ts
+export interface Medico {
+  id?: number;
+  nombre: string;
+  apellido: string;
+  especialidad: string;
 }
 
-// Configuración del caché
-const CACHE_LIMIT = 1000; // Máximo de pacientes en caché
-const CACHE_EXPIRY = 5 * 60 * 1000; // 5 minutos en milisegundos
+// URL base de la API desde las variables de entorno
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
-// Función para generar una clave única para cada consulta
-const getCacheKey = (params: PaginationParams): string => {
-  return `page=${params.page}&pageSize=${params.pageSize}&sortBy=${params.sortBy}&sortOrder=${params.sortOrder}&search=${params.search || ''}`;
-};
+// Obtener todos los médicos
+export async function getMedicos(): Promise<Medico[]> {
+  try {
+    const response = await fetch(`${API_URL}/medicos`);
+    if (!response.ok) {
+      throw new Error('Error al obtener los médicos');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    // Por ahora, devolvemos datos de ejemplo
+    return mockMedicos;
+  }
+}
 
-export function usePacientesCache() {
-  // Estado para almacenar el caché
-  const [cache, setCache] = useState<PacientesCache>({});
-  const [totalCachedItems, setTotalCachedItems] = useState<number>(0);
-  
-  // Limpiar caché cuando alcanza el límite o expira
-  const cleanupCache = () => {
-    const now = Date.now();
-    const newCache: PacientesCache = {};
-    let count = 0;
-    
-    // Ordenar entradas por tiempo, mantener las más recientes
-    const entries = Object.entries(cache)
-      .filter(([_, value]) => now - value.timestamp < CACHE_EXPIRY)
-      .sort((a, b) => b[1].timestamp - a[1].timestamp);
-    
-    // Reconstruir el caché con las entradas más recientes
-    for (const [key, value] of entries) {
-      if (count + value.data.length <= CACHE_LIMIT) {
-        newCache[key] = value;
-        count += value.data.length;
-      } else {
-        break;
-      }
-    }
-    
-    setCache(newCache);
-    setTotalCachedItems(count);
-  };
-  
-  // Efecto para limpiar el caché periódicamente
-  useEffect(() => {
-    const interval = setInterval(cleanupCache, CACHE_EXPIRY / 2);
-    return () => clearInterval(interval);
-  }, [cache]);
-  
-  // Función para obtener datos con caché
-  const fetchPacientesWithCache = async (params: PaginationParams): Promise<PaginatedResponse<Paciente>> => {
-    const cacheKey = getCacheKey(params);
-    
-    // Comprobar si los datos están en caché y son válidos
-    if (cache[cacheKey] && Date.now() - cache[cacheKey].timestamp < CACHE_EXPIRY) {
-      console.log('Usando datos en caché para:', cacheKey);
-      return {
-        data: cache[cacheKey].data,
-        meta: cache[cacheKey].meta
-      };
-    }
-    
-    // Si no están en caché o expiró, obtener de la API
-    console.log('Obteniendo datos frescos para:', cacheKey);
-    const response = await getPacientes(params);
-    
-    // Actualizar el caché
-    setCache(prevCache => {
-      const newCache = { ...prevCache };
-      newCache[cacheKey] = {
-        data: response.data,
-        timestamp: Date.now(),
-        meta: response.meta
-      };
-      return newCache;
+// Crear un nuevo médico
+export async function createMedico(medico: Omit<Medico, 'id'>): Promise<Medico> {
+  try {
+    const response = await fetch(`${API_URL}/medico`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(medico),
     });
     
-    // Actualizar contador de elementos en caché
-    setTotalCachedItems(prev => prev + response.data.length);
-    
-    // Limpiar caché si excede el límite
-    if (totalCachedItems + response.data.length > CACHE_LIMIT) {
-      cleanupCache();
+    if (!response.ok) {
+      throw new Error('Error al crear el médico');
     }
     
-    return response;
-  };
-  
-  // Función para invalidar el caché (útil después de crear/actualizar)
-  const invalidateCache = () => {
-    setCache({});
-    setTotalCachedItems(0);
-  };
-  
-  return {
-    fetchPacientesWithCache,
-    invalidateCache,
-    cacheSize: totalCachedItems
-  };
+    return await response.json();
+  } catch (error) {
+    console.error('Error:', error);
+    // Simulamos una respuesta
+    return {
+      id: Math.floor(Math.random() * 1000),
+      ...medico
+    };
+  }
 }
+
+// Datos mock para desarrollo mientras no hay API
+export const mockMedicos: Medico[] = [
+  {
+    id: 11,
+    nombre: "Luis",
+    apellido: "Pérez",
+    especialidad: "Cardiología"
+  },
+  {
+    id: 12,
+    nombre: "Ana",
+    apellido: "García",
+    especialidad: "Pediatría"
+  },
+  {
+    id: 13,
+    nombre: "Carlos",
+    apellido: "Martínez",
+    especialidad: "Neurología"
+  },
+  {
+    id: 14,
+    nombre: "Elena",
+    apellido: "Rodríguez",
+    especialidad: "Dermatología"
+  },
+  {
+    id: 15,
+    nombre: "Javier",
+    apellido: "López",
+    especialidad: "Traumatología"
+  }
+];
