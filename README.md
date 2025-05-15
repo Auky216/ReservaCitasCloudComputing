@@ -77,9 +77,20 @@ SaludCare es una plataforma innovadora para la digitalización de servicios méd
 
 ¿Interesado en saber más sobre este proyecto o mis habilidades? ¡Contáctame!
 
-- **Email**: [adrian.auqui@utec.edu.pe]
+- **Email**: adrian.auqui@utec.edu.pe
 - **LinkedIn**: [AdrianAuquiPerez](https://www.linkedin.com/in/adrian-antonio-auqui-perez-a079b2291/)
 - **GitHub**: [Auky216](https://github.com/Auky216)
+
+## Imágenes de Referencia
+
+### Pacientes
+![Arquitectura del Sistema](S1.png)
+
+### Resumen Medico
+![Interfaz de Usuario](S2.png)
+
+### Examenes
+![Dashboard de Análisis](S3.png)
 
 ---
 
